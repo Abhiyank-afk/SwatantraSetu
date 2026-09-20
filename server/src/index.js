@@ -13,10 +13,22 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'https://swatantrasetu-1.onrender.com', credentials: true }));
+// Allowed frontend URLs
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://swatantrasetu-1.onrender.com'
+];
+
+// CORS configuration
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
 app.use(express.json({ limit: '100kb' }));
 app.use(morgan('dev'));
 
+// Health check
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
@@ -26,28 +38,43 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workers', workerRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api', platformRoutes);
 
+// Error handler
 app.use((err, _req, res, _next) => {
   console.error(err);
-  res.status(500).json({ message: 'Internal server error' });
+  res.status(500).json({
+    message: 'Internal server error'
+  });
 });
 
+// Start server
 async function start() {
   const uri = process.env.MONGODB_URI;
+
   if (uri) {
     try {
-      await mongoose.connect(uri, { serverSelectionTimeoutMS: 2500 });
+      await mongoose.connect(uri, {
+        serverSelectionTimeoutMS: 2500
+      });
+
       console.log('MongoDB connected');
     } catch (e) {
-      console.warn('MongoDB not available — serving in-memory sample data.', e.message);
+      console.warn(
+        'MongoDB not available — serving in-memory sample data.',
+        e.message
+      );
     }
   }
+
   app.listen(PORT, () => {
-    console.log(`Co-opConnect API listening on http://localhost:${PORT}`);
+    console.log(
+      `Co-opConnect API listening on http://localhost:${PORT}`
+    );
   });
 }
 
