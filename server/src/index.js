@@ -13,16 +13,20 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Allowed frontend URLs
-const allowedOrigins = [
+const normalizeOrigin = (origin) => origin.trim().replace(/\/+$/, '');
+const allowedOrigins = new Set([
   'http://localhost:5173',
-  'https://swatantrasetu-1.onrender.com'
-];
+  'http://127.0.0.1:5173',
+  'https://swatantrasetu-1.onrender.com',
+  ...(process.env.CLIENT_URL || '').split(',').filter(Boolean).map(normalizeOrigin),
+].map(normalizeOrigin));
 
-// CORS configuration
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(normalizeOrigin(origin))) return callback(null, true);
+    return callback(new Error('Origin is not allowed by CORS'));
+  },
+  credentials: true,
 }));
 
 app.use(express.json({ limit: '100kb' }));

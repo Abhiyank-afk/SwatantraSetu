@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: swatantrasetu-api
+    runtime: node
+    buildCommand: npm ci --prefix server
+    startCommand: npm start
+    envVars:
+      - key: CLIENT_URL
+        value: https://swatantrasetu-1.onrender.com
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+  - type: static
+    name: swatantrasetu-web
+    buildCommand: npm ci --prefix client && npm run build --prefix client
+    staticPublishPath: client/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://swatantrasetu.onrender.com/api

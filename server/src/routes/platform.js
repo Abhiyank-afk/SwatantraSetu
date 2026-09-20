@@ -4,14 +4,17 @@ import { authRequired, requireRole } from '../middleware/auth.js';
 import OpenAI from 'openai';
 
 const router = Router();
-const openai=new OpenAI({
-  apiKey: process.env.OPEN_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1',
-  defaultHeaders: {
-    'HTTP-Referer': 'https://your-site-url.com', // optional but recommended, used for OpenRouter's leaderboard/rankings
-    'X-Title': 'Swatantra Setu'
-  }
-});
+const openAiKey = process.env.OPENROUTER_API_KEY || process.env.OPEN_API_KEY || process.env.OPENAI_API_KEY;
+const openai = openAiKey
+  ? new OpenAI({
+      apiKey: openAiKey,
+      baseURL: 'https://openrouter.ai/api/v1',
+      defaultHeaders: {
+        'HTTP-Referer': 'https://swatantrasetu-1.onrender.com',
+        'X-Title': 'Swatantra Setu',
+      },
+    })
+  : null;
 
 router.get('/services', (_req, res) => {
   res.json({ data: store.services });
@@ -88,6 +91,16 @@ router.post('/ai/chat', async (req, res) => {
 
   if (!message) {
     return res.status(400).json({ message: 'message is required' });
+  }
+
+  if (!openai) {
+    return res.status(503).json({
+      data: {
+        reply:
+          'I\'m having trouble connecting right now. You can also dial *789*# or SMS BOOK <SERVICE> <PINCODE> to 56767.',
+        lang,
+      },
+    });
   }
 
   const availableWorkers = store.workers
