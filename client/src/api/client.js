@@ -1,4 +1,5 @@
-const API_BASE = 'https://swatantrasetu.onrender.com';
+const configuredApiBase = import.meta.env.VITE_API_URL;
+const API_BASE = (configuredApiBase || (import.meta.env.DEV ? '/api' : 'https://swatantrasetu.onrender.com/api')).replace(/\/+$/, '');
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('cc_token');
