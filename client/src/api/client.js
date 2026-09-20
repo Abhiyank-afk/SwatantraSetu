@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = 'https://swatantrasetu.onrender.com';
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('cc_token');
